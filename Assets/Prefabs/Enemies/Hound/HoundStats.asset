@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: HoundStats
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStats
   enemyPrefab: {fileID: 0}
-  hp: 0
-  speed: 0
-  attack: 0
-  attackCooldown: 0
-  cost: 0
-  milkDropAmount: 0
+  hp: 35
+  speed: 1.65
+  attack: 4
+  attackCooldown: 0.9
+  cost: 8
+  milkDropAmount: 8

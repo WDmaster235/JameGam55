@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: a9abfae2a5c966f47ab0fd91f9317f85
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - xBowTowerPrefab: {fileID: 8628109275642509793, guid: 777b11d4c2311ae4fb215dd4eab9e7a6, type: 3}
+  - skeletonSpawnerTowerPrefab: {fileID: 6752547609233037031, guid: 2065a65adff8baf4ca9ff4b7b564ff0c, type: 3}
+  - splitCanonTowerPrefab: {fileID: 4565068838557839802, guid: 7baa8a2f18c25324d82466b1a2e0044c, type: 3}
+  - spaceCowTowerPrefab: {fileID: 1201414678993282259, guid: eabe817487dea9d4ca16390faafd3bd2, type: 3}
+  - houndEnemyPrefab: {fileID: 458683582866856012, guid: fb91852176d71dd41b1228f08706c9dd, type: 3}
+  - zombieEnemyPrefab: {fileID: 5032012628062162743, guid: 3e813627a983e6e459b8134153eab03a, type: 3}
+  - rangerEnemyPrefab: {fileID: 735787518340229599, guid: bd8b68003357e4d4bbef55cb47271e6e, type: 3}
+  - skeletonPrefab: {fileID: 1967833898986640289, guid: aaf6c56a98103a54c8133a4b8046e2d1, type: 3}
+  - xBowShotPrefab: {fileID: 8192020005651507887, guid: 37866d4b26049ba4780fe0a983f866fd, type: 3}
+  - splitCanonShotPrefab: {fileID: 3266620553899251239, guid: 1803bb32b4978dd4787ddce4404783bb, type: 3}
+  - rangerShotPrefab: {fileID: 4714099659421535881, guid: 82d07c9d680990f4fa73a5dbc4ab665f, type: 3}
+  - milkPickupPrefab: {fileID: 4438461859444022743, guid: e2adbb424daeb7a48889d04c3ae8adbf, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

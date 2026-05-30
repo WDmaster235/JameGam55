@@ -6,29 +6,40 @@ public class RangerScript : EnemyScript
     [SerializeField] private Transform shootPoint;
 
     [SerializeField] private float stopDistance = 3f;
-    [SerializeField] private float detectionDistance = 10f;
-    [SerializeField] private float detectionHeight = 1f;
+    [SerializeField] private float detectionDistance = 30f;
 
-    private Transform target;
+    private TowerScript targetTower;
+
+    public override void Initialize(EnemyDefinition enemyDefinition, int laneIndex)
+    {
+        base.Initialize(enemyDefinition, laneIndex);
+        stopDistance = enemyDefinition.RangerStopDistance;
+        detectionDistance = enemyDefinition.RangerDetectionDistance;
+    }
+
+    public override void Initialize(EnemyStats stats, EnemyDefinition enemyDefinition, int laneIndex)
+    {
+        base.Initialize(stats, enemyDefinition, laneIndex);
+        stopDistance = enemyDefinition.RangerStopDistance;
+        detectionDistance = enemyDefinition.RangerDetectionDistance;
+    }
 
     protected override void FixedUpdate()
     {
-        attackTimer -= Time.fixedDeltaTime;
-
-        FindTargetInFront();
-
-        Move();
+        base.FixedUpdate();
     }
 
     protected override void Move()
     {
-        if (target == null)
+        targetTower = TowerDefenseGame.Instance.GetFirstTowerAheadForRanger(LaneIndex, transform.position.x, detectionDistance);
+
+        if (targetTower == null)
         {
             rb.linearVelocity = Vector2.left * speed;
             return;
         }
 
-        float xDistance = Mathf.Abs(transform.position.x - target.position.x);
+        float xDistance = transform.position.x - targetTower.Position.x;
 
         if (xDistance > stopDistance)
         {
@@ -60,57 +71,27 @@ public class RangerScript : EnemyScript
         }
     }
 
-    // call this from the Ranger attack animation event
+    // animation events can use this shot too
     public void FireRangerShot()
     {
+        if (TowerDefenseGame.Instance == null || targetTower == null || !targetTower.IsAlive)
+        {
+            return;
+        }
+
         Vector3 spawnPosition = transform.position;
 
         if (shootPoint != null)
         {
             spawnPosition = shootPoint.position;
         }
-
-        GameObject shot = Instantiate(rangerShotPrefab, spawnPosition, Quaternion.identity);
-
-        RangerShotScript shotScript = shot.GetComponent<RangerShotScript>();
-
-        if (shotScript != null)
+        else
         {
-            shotScript.SetDamage(attack);
-        }
-    }
-
-    private void FindTargetInFront()
-    {
-        Vector2 boxCenter = (Vector2)transform.position + Vector2.left * (detectionDistance / 2f);
-        Vector2 boxSize = new Vector2(detectionDistance, detectionHeight);
-
-        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, 0f);
-
-        Transform closestTower = null;
-        float closestXDistance = Mathf.Infinity;
-
-        foreach (Collider2D hit in hits)
-        {
-            if (!hit.CompareTag("tower"))
-            {
-                continue;
-            }
-
-            if (hit.transform.position.x > transform.position.x)
-            {
-                continue;
-            }
-
-            float xDistance = Mathf.Abs(transform.position.x - hit.transform.position.x);
-
-            if (xDistance < closestXDistance)
-            {
-                closestXDistance = xDistance;
-                closestTower = hit.transform;
-            }
+            spawnPosition += Vector3.left * 0.42f;
         }
 
-        target = closestTower;
+        float projectileSpeed = definition != null ? definition.ProjectileSpeed : 4.4f;
+        Color shotColor = definition != null ? definition.AccentColor : Color.magenta;
+        TowerDefenseGame.Instance.SpawnRangerProjectile(spawnPosition, LaneIndex, attack, projectileSpeed, shotColor);
     }
 }

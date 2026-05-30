@@ -440,9 +440,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cd29545dde2e5c4ca833cce0a5e8861, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerMenuScript
-  archerTowerPrefab: {fileID: 0}
-  cannonTowerPrefab: {fileID: 0}
-  mageTowerPrefab: {fileID: 0}
+  skeletonTowerPrefab: {fileID: 6752547609233037031, guid: 2065a65adff8baf4ca9ff4b7b564ff0c, type: 3}
+  cannonTowerPrefab: {fileID: 4565068838557839802, guid: 7baa8a2f18c25324d82466b1a2e0044c, type: 3}
+  bowTowerPrefab: {fileID: 8628109275642509793, guid: 777b11d4c2311ae4fb215dd4eab9e7a6, type: 3}
+  cowTowerPrefab: {fileID: 1201414678993282259, guid: eabe817487dea9d4ca16390faafd3bd2, type: 3}
 --- !u!1 &5740222652802244833
 GameObject:
   m_ObjectHideFlags: 0

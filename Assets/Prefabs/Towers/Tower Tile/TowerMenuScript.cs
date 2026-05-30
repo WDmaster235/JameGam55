@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class TowerMenuScript : MonoBehaviour
 {
@@ -9,30 +8,6 @@ public class TowerMenuScript : MonoBehaviour
     [SerializeField] private GameObject cowTowerPrefab;
 
     private TowerTileScript tile;
-    private int openFrame;
-
-    private void Start()
-    {
-        openFrame = Time.frameCount;
-    }
-
-    private void Update()
-    {
-        if (Time.frameCount == openFrame)
-        {
-            return;
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-
-            Destroy(gameObject);
-        }
-    }
 
     public void SetTile(TowerTileScript newTile)
     {
@@ -41,25 +16,57 @@ public class TowerMenuScript : MonoBehaviour
 
     public void BuySkeletonTower()
     {
-        tile.PlaceTower(skeletonTowerPrefab);
+        if (TowerDefenseGame.Instance != null)
+        {
+            tile.PlaceTower(TowerKind.SkeletonSpawner);
+        }
+        else
+        {
+            tile.PlaceTower(skeletonTowerPrefab);
+        }
+
         Destroy(gameObject);
     }
 
     public void BuyCannonTower()
     {
-        tile.PlaceTower(cannonTowerPrefab);
+        if (TowerDefenseGame.Instance != null)
+        {
+            tile.PlaceTower(TowerKind.SplitCanon);
+        }
+        else
+        {
+            tile.PlaceTower(cannonTowerPrefab);
+        }
+
         Destroy(gameObject);
     }
 
     public void BuyXBowTower()
     {
-        tile.PlaceTower(bowTowerPrefab);
+        if (TowerDefenseGame.Instance != null)
+        {
+            tile.PlaceTower(TowerKind.XBow);
+        }
+        else
+        {
+            tile.PlaceTower(bowTowerPrefab);
+        }
+
         Destroy(gameObject);
     }
 
     public void BuySpaceCowTower()
     {
-        tile.PlaceTower(cowTowerPrefab);
+        if (TowerDefenseGame.Instance != null)
+        {
+            tile.PlaceTower(TowerKind.SpaceCow);
+        }
+        else
+        {
+            tile.PlaceTower(cowTowerPrefab);
+        }
+
         Destroy(gameObject);
     }
 }

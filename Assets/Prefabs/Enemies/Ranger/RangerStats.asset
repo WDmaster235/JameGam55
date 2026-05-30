@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: RangerStats
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStats
   enemyPrefab: {fileID: 0}
-  hp: 0
-  speed: 0
-  attack: 0
-  attackCooldown: 0
-  cost: 0
-  milkDropAmount: 0
+  hp: 55
+  speed: 0.72
+  attack: 7
+  attackCooldown: 1.45
+  cost: 24
+  milkDropAmount: 24
