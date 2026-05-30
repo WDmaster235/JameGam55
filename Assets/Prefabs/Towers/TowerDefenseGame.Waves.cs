@@ -30,9 +30,18 @@ public sealed partial class TowerDefenseGame
                 yield return new WaitForSeconds(Random.Range(0.45f, 1.05f));
             }
 
-            while (!gameOver && activeEnemies.Count > 0)
+            float clearTimeout = 45f;
+
+            while (!gameOver && activeEnemies.Count > 0 && clearTimeout > 0f)
             {
+                clearTimeout -= Time.deltaTime;
                 yield return null;
+            }
+
+            if (clearTimeout <= 0f)
+            {
+                Debug.LogWarning("Wave forced to clear.");
+                activeEnemies.Clear();
             }
 
             if (!gameOver)
