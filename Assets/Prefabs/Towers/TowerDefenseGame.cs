@@ -18,6 +18,7 @@ public sealed partial class TowerDefenseGame : MonoBehaviour
     [SerializeField] private float spawnX = 10.25f;
     [SerializeField] private float offscreenSpawnPadding = 1.25f;
     [SerializeField] private float loseX = -6.45f;
+    [SerializeField] private float laneSpawnCooldown = 1f;
 
     private readonly TowerTileScript[,] tiles = new TowerTileScript[LaneCount, ColumnCount];
     private readonly List<EnemyScript> activeEnemies = new List<EnemyScript>();
@@ -92,6 +93,7 @@ public sealed partial class TowerDefenseGame : MonoBehaviour
 
     private void Update()
     {
+        HandleBoardClickInput();
         UpdateUi();
     }
 

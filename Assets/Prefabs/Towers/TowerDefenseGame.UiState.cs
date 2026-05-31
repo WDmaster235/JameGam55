@@ -7,13 +7,13 @@ public sealed partial class TowerDefenseGame
     {
         GameObject labelObject = new GameObject("Label");
         labelObject.transform.SetParent(parent, false);
-        labelObject.transform.localPosition = new Vector3(0f, 0.72f, -0.05f);
-        labelObject.transform.localScale = new Vector3(0.08f, 0.08f, 1f);
+        labelObject.transform.localPosition = new Vector3(0f, 0.62f, -0.05f);
+        labelObject.transform.localScale = new Vector3(0.045f, 0.045f, 1f);
 
         TextMesh textMesh = labelObject.AddComponent<TextMesh>();
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
-        textMesh.fontSize = 32;
+        textMesh.fontSize = 24;
         textMesh.color = color;
         textMesh.text = "";
         return textMesh;

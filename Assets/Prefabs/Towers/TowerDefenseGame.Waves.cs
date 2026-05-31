@@ -21,12 +21,22 @@ public sealed partial class TowerDefenseGame
             List<EnemyKind>[] wavePurchases = BuildWavePurchases(waveMoney);
             ShowStatus("Wave " + waveNumber + " has " + waveMoney + " enemy money.");
 
+            float[] nextLaneSpawnTime = new float[LaneCount];
+
             while (!gameOver && HasEnemiesToSpawn(wavePurchases))
             {
-                int lane = ChooseLaneWithQueuedEnemy(wavePurchases);
+                int lane = ChooseLaneWithQueuedEnemy(wavePurchases, nextLaneSpawnTime);
+
+                if (lane < 0)
+                {
+                    yield return new WaitForSeconds(GetShortestLaneSpawnWait(wavePurchases, nextLaneSpawnTime));
+                    continue;
+                }
+
                 EnemyKind enemyKind = wavePurchases[lane][0];
                 wavePurchases[lane].RemoveAt(0);
                 SpawnEnemy(enemyKind, lane);
+                nextLaneSpawnTime[lane] = Time.time + laneSpawnCooldown;
                 yield return new WaitForSeconds(Random.Range(0.45f, 1.05f));
             }
 
@@ -187,18 +197,40 @@ public sealed partial class TowerDefenseGame
         return false;
     }
 
-    private int ChooseLaneWithQueuedEnemy(List<EnemyKind>[] wavePurchases)
+    private int ChooseLaneWithQueuedEnemy(List<EnemyKind>[] wavePurchases, float[] nextLaneSpawnTime)
     {
         List<int> lanes = new List<int>();
 
         for (int lane = 0; lane < wavePurchases.Length; lane++)
         {
-            if (wavePurchases[lane].Count > 0)
+            if (wavePurchases[lane].Count > 0 && Time.time >= nextLaneSpawnTime[lane])
             {
                 lanes.Add(lane);
             }
         }
 
+        if (lanes.Count == 0)
+        {
+            return -1;
+        }
+
         return lanes[Random.Range(0, lanes.Count)];
+    }
+
+    private float GetShortestLaneSpawnWait(List<EnemyKind>[] wavePurchases, float[] nextLaneSpawnTime)
+    {
+        float shortestWait = laneSpawnCooldown;
+
+        for (int lane = 0; lane < wavePurchases.Length; lane++)
+        {
+            if (wavePurchases[lane].Count <= 0)
+            {
+                continue;
+            }
+
+            shortestWait = Mathf.Min(shortestWait, nextLaneSpawnTime[lane] - Time.time);
+        }
+
+        return Mathf.Clamp(shortestWait, 0.05f, laneSpawnCooldown);
     }
 }

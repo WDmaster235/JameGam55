@@ -1,4 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public sealed partial class TowerDefenseGame
 {
@@ -9,19 +13,18 @@ public sealed partial class TowerDefenseGame
             return;
         }
 
-        // clicking a tile either selects a tower or places one
         selectedTile = clickedTile;
 
         if (clickedTile.CurrentTower != null)
         {
-            selectedTower = clickedTile.CurrentTower;
+            SelectTower(clickedTile.CurrentTower);
             selectedBuildKind = null;
             ShowStatus("Selected " + selectedTower.DisplayName + ".");
             UpdateUi();
             return;
         }
 
-        selectedTower = null;
+        SelectTower(null);
 
         if (selectedBuildKind.HasValue)
         {
@@ -41,7 +44,7 @@ public sealed partial class TowerDefenseGame
         }
 
         selectedBuildKind = towerKind;
-        selectedTower = null;
+        SelectTower(null);
         ShowStatus("Selected " + GameDefinitions.GetTower(towerKind).DisplayName + ".");
         UpdateUi();
     }
@@ -84,7 +87,7 @@ public sealed partial class TowerDefenseGame
 
         targetTile.SetTower(tower);
         activeTowers.Add(tower);
-        selectedTower = tower;
+        SelectTower(tower);
         selectedBuildKind = null;
         ShowStatus(towerDefinition.DisplayName + " placed.");
         return true;
@@ -127,7 +130,7 @@ public sealed partial class TowerDefenseGame
 
         if (tower != null && tower == selectedTower)
         {
-            selectedTower = null;
+            SelectTower(null);
         }
 
         if (tower != null && tower.Position != Vector3.zero)
@@ -211,10 +214,131 @@ public sealed partial class TowerDefenseGame
             selectedTile = towerTile;
         }
 
-        selectedTower = null;
+        SelectTower(null);
         AddMilk(refund);
         Destroy(towerToSell.gameObject);
         ShowStatus("Sold tower for " + refund + " milk.");
         UpdateUi();
+    }
+
+    private void SelectTower(TowerScript newTower)
+    {
+        if (selectedTower != null)
+        {
+            selectedTower.SetLabelVisible(false);
+        }
+
+        selectedTower = newTower;
+
+        if (selectedTower != null)
+        {
+            selectedTower.SetLabelVisible(true);
+        }
+    }
+
+    private void HandleBoardClickInput()
+    {
+        if (gameOver || Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            return;
+        }
+
+        Vector2 screenPosition = Mouse.current.position.ReadValue();
+
+        if (IsPointerOverUi(screenPosition))
+        {
+            return;
+        }
+
+        Camera mainCamera = Camera.main;
+
+        if (mainCamera == null)
+        {
+            return;
+        }
+
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(screenPosition);
+        worldPosition.z = 0f;
+
+        Collider2D[] hits = Physics2D.OverlapPointAll(worldPosition);
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i] != null && hits[i].GetComponent<MilkPickupScript>() != null)
+            {
+                return;
+            }
+        }
+
+        TowerTileScript clickedTile = GetTileUnderWorldPoint(worldPosition);
+
+        if (clickedTile != null)
+        {
+            HandleTileClicked(clickedTile);
+        }
+    }
+
+    private bool IsPointerOverUi(Vector2 screenPosition)
+    {
+        if (EventSystem.current == null)
+        {
+            return false;
+        }
+
+        PointerEventData pointerData = new PointerEventData(EventSystem.current);
+        pointerData.position = screenPosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            if (results[i].module is GraphicRaycaster)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private TowerTileScript GetTileUnderWorldPoint(Vector3 worldPosition)
+    {
+        TowerTileScript closestTile = null;
+        float closestDistanceSquared = Mathf.Infinity;
+        const float xTolerance = 0.62f;
+        const float yTolerance = 0.62f;
+
+        for (int lane = 0; lane < LaneCount; lane++)
+        {
+            for (int column = 0; column < ColumnCount; column++)
+            {
+                TowerTileScript tile = tiles[lane, column];
+
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                Vector3 tilePosition = tile.transform.position;
+                float dx = Mathf.Abs(worldPosition.x - tilePosition.x);
+                float dy = Mathf.Abs(worldPosition.y - tilePosition.y);
+
+                if (dx > xTolerance || dy > yTolerance)
+                {
+                    continue;
+                }
+
+                float distanceSquared = (worldPosition - tilePosition).sqrMagnitude;
+
+                if (distanceSquared < closestDistanceSquared)
+                {
+                    closestDistanceSquared = distanceSquared;
+                    closestTile = tile;
+                }
+            }
+        }
+
+        return closestTile;
     }
 }

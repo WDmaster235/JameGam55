@@ -76,6 +76,15 @@ public abstract class TowerScript : MonoBehaviour, ILaneDamageable
     {
         label = newLabel;
         UpdateLabel();
+        SetLabelVisible(false);
+    }
+
+    public void SetLabelVisible(bool visible)
+    {
+        if (label != null)
+        {
+            label.gameObject.SetActive(visible);
+        }
     }
 
     protected virtual void Update()

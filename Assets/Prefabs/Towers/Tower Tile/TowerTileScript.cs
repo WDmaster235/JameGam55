@@ -23,15 +23,21 @@ public class TowerTileScript : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        HandleClick();
+        if (TowerDefenseGame.Instance == null)
+        {
+            HandleLegacyClick();
+        }
     }
 
     private void OnMouseDown()
     {
-        HandleClick();
+        if (TowerDefenseGame.Instance == null)
+        {
+            HandleLegacyClick();
+        }
     }
 
-    private void HandleClick()
+    private void HandleLegacyClick()
     {
         if (game == null)
         {
