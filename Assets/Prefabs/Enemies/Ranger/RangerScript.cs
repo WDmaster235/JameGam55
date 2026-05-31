@@ -8,8 +8,6 @@ public class RangerScript : EnemyScript
     [SerializeField] private float stopDistance = 3f;
     [SerializeField] private float detectionDistance = 30f;
 
-    private TowerScript targetTower;
-
     public override void Initialize(EnemyDefinition enemyDefinition, int laneIndex)
     {
         base.Initialize(enemyDefinition, laneIndex);
@@ -24,22 +22,21 @@ public class RangerScript : EnemyScript
         detectionDistance = enemyDefinition.RangerDetectionDistance;
     }
 
-    protected override void FixedUpdate()
-    {
-        base.FixedUpdate();
-    }
-
     protected override void Move()
     {
-        targetTower = TowerDefenseGame.Instance.GetFirstTowerAheadForRanger(LaneIndex, transform.position.x, detectionDistance);
+        targetUnit = TowerDefenseGame.Instance.GetFirstDefenderAheadForRanger(
+            LaneIndex,
+            transform.position.x,
+            detectionDistance
+        );
 
-        if (targetTower == null)
+        if (targetUnit == null)
         {
             rb.linearVelocity = Vector2.left * speed;
             return;
         }
 
-        float xDistance = transform.position.x - targetTower.Position.x;
+        float xDistance = transform.position.x - targetUnit.Position.x;
 
         if (xDistance > stopDistance)
         {
@@ -71,10 +68,10 @@ public class RangerScript : EnemyScript
         }
     }
 
-    // animation events can use this shot too
+    // Animation events can use this shot too.
     public void FireRangerShot()
     {
-        if (TowerDefenseGame.Instance == null || targetTower == null || !targetTower.IsAlive)
+        if (TowerDefenseGame.Instance == null || targetUnit == null || !targetUnit.IsAlive)
         {
             return;
         }
@@ -92,6 +89,13 @@ public class RangerScript : EnemyScript
 
         float projectileSpeed = definition != null ? definition.ProjectileSpeed : 4.4f;
         Color shotColor = definition != null ? definition.AccentColor : Color.magenta;
-        TowerDefenseGame.Instance.SpawnRangerProjectile(spawnPosition, LaneIndex, attack, projectileSpeed, shotColor);
+
+        TowerDefenseGame.Instance.SpawnRangerProjectile(
+            spawnPosition,
+            LaneIndex,
+            attack,
+            projectileSpeed,
+            shotColor
+        );
     }
 }

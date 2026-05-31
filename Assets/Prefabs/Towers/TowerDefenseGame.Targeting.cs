@@ -5,7 +5,7 @@ public sealed partial class TowerDefenseGame
 {
     public EnemyScript GetFirstEnemyAhead(int lane, float fromX, float range)
     {
-        // shots always aim at the closest enemy in front
+        // Towers shoot to the right, so only enemies to the right are valid targets.
         EnemyScript closestEnemy = null;
         float closestDistance = Mathf.Infinity;
 
@@ -60,6 +60,8 @@ public sealed partial class TowerDefenseGame
 
     public ILaneDamageable GetClosestDefenderInMeleeRange(int lane, float enemyX, float range)
     {
+        // Enemies move left, so they should only attack defenders in front of them.
+        // Small negative tolerance keeps melee stable when colliders slightly overlap.
         ILaneDamageable closestTarget = null;
         float closestDistance = Mathf.Infinity;
 
@@ -72,12 +74,19 @@ public sealed partial class TowerDefenseGame
                 continue;
             }
 
-            float distance = Mathf.Abs(skeleton.Position.x - enemyX);
+            float distance = enemyX - skeleton.Position.x;
 
-            if (distance <= range && distance < closestDistance)
+            if (distance < -0.15f || distance > range)
+            {
+                continue;
+            }
+
+            float absoluteDistance = Mathf.Abs(distance);
+
+            if (absoluteDistance < closestDistance)
             {
                 closestTarget = skeleton;
-                closestDistance = distance;
+                closestDistance = absoluteDistance;
             }
         }
 
@@ -90,22 +99,53 @@ public sealed partial class TowerDefenseGame
                 continue;
             }
 
-            float distance = Mathf.Abs(tower.Position.x - enemyX);
+            float distance = enemyX - tower.Position.x;
 
-            if (distance <= range && distance < closestDistance)
+            if (distance < -0.15f || distance > range)
+            {
+                continue;
+            }
+
+            float absoluteDistance = Mathf.Abs(distance);
+
+            if (absoluteDistance < closestDistance)
             {
                 closestTarget = tower;
-                closestDistance = distance;
+                closestDistance = absoluteDistance;
             }
         }
 
         return closestTarget;
     }
 
-    public TowerScript GetFirstTowerAheadForRanger(int lane, float rangerX, float detectionDistance)
+    public ILaneDamageable GetFirstDefenderAheadForRanger(int lane, float rangerX, float detectionDistance)
     {
-        TowerScript closestTower = null;
+        // Rangers shoot left, so both towers and skeletons in front of the ranger are valid targets.
+        ILaneDamageable closestTarget = null;
         float closestDistance = Mathf.Infinity;
+
+        for (int i = 0; i < activeSkeletons.Count; i++)
+        {
+            SkeletonScript skeleton = activeSkeletons[i];
+
+            if (skeleton == null || !skeleton.IsAlive || skeleton.LaneIndex != lane)
+            {
+                continue;
+            }
+
+            float distance = rangerX - skeleton.Position.x;
+
+            if (distance < 0f || distance > detectionDistance)
+            {
+                continue;
+            }
+
+            if (distance < closestDistance)
+            {
+                closestTarget = skeleton;
+                closestDistance = distance;
+            }
+        }
 
         for (int i = 0; i < activeTowers.Count; i++)
         {
@@ -125,12 +165,12 @@ public sealed partial class TowerDefenseGame
 
             if (distance < closestDistance)
             {
+                closestTarget = tower;
                 closestDistance = distance;
-                closestTower = tower;
             }
         }
 
-        return closestTower;
+        return closestTarget;
     }
 
     public EnemyScript GetClosestEnemyForSkeleton(int lane, float skeletonX, float range)
@@ -154,10 +194,12 @@ public sealed partial class TowerDefenseGame
                 continue;
             }
 
-            if (Mathf.Abs(distance) < closestDistance)
+            float absoluteDistance = Mathf.Abs(distance);
+
+            if (absoluteDistance < closestDistance)
             {
                 closestEnemy = enemy;
-                closestDistance = Mathf.Abs(distance);
+                closestDistance = absoluteDistance;
             }
         }
 
