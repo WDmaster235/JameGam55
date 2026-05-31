@@ -113,6 +113,38 @@ public abstract class EnemyScript : MonoBehaviour
         milkDropAmount = enemyStats.milkDropAmount;
         cost = enemyStats.cost;
     }
+    public virtual void ApplyWaveScaling(
+    int currentWave,
+    float healthGrowthPerWave,
+    float attackGrowthPerWave,
+    float milkDropGrowthPerWave,
+    float speedGrowthPerWave,
+    float maxSpeedMultiplier)
+    {
+        int extraWaves = Mathf.Max(0, currentWave - 1);
+
+        if (extraWaves <= 0)
+        {
+            UpdateLabel();
+            return;
+        }
+
+        float healthMultiplier = 1f + extraWaves * Mathf.Max(0f, healthGrowthPerWave);
+        float attackMultiplier = 1f + extraWaves * Mathf.Max(0f, attackGrowthPerWave);
+        float milkDropMultiplier = 1f + extraWaves * Mathf.Max(0f, milkDropGrowthPerWave);
+        float speedMultiplier = 1f + extraWaves * Mathf.Max(0f, speedGrowthPerWave);
+
+        speedMultiplier = Mathf.Min(speedMultiplier, Mathf.Max(1f, maxSpeedMultiplier));
+
+        maxHp = Mathf.Max(1, Mathf.RoundToInt(maxHp * healthMultiplier));
+        currentHp = maxHp;
+
+        attack = Mathf.Max(1, Mathf.RoundToInt(attack * attackMultiplier));
+        milkDropAmount = Mathf.Max(1, Mathf.RoundToInt(milkDropAmount * milkDropMultiplier));
+        speed *= speedMultiplier;
+
+        UpdateLabel();
+    }
 
     private int GetStatOrFallback(int statValue, int fallbackValue)
     {

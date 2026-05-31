@@ -100,6 +100,16 @@ public sealed partial class TowerDefenseGame
         }
 
         enemy.Initialize(enemyStats, enemyDefinition, lane);
+
+        enemy.ApplyWaveScaling(
+            waveNumber,
+            enemyHealthGrowthPerWave,
+            enemyAttackGrowthPerWave,
+            enemyMilkDropGrowthPerWave,
+            enemySpeedGrowthPerWave,
+            enemyMaxSpeedMultiplier
+        );
+
         enemy.SetLabel(CreateWorldLabel(enemyObject.transform, enemyDefinition.AccentColor));
         RegisterEnemy(enemy);
     }

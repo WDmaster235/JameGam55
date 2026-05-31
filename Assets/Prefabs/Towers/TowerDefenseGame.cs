@@ -11,14 +11,21 @@ public sealed partial class TowerDefenseGame : MonoBehaviour
 
     public static TowerDefenseGame Instance { get; private set; }
 
-    [SerializeField] private int startingMilk = 200;
+    [SerializeField] private int startingMilk = 225;
     [SerializeField] private int initialWaveMoney = 55;
-    [SerializeField] private float waveMoneyGrowth = 1.35f;
+    [SerializeField] private float waveMoneyGrowth = 1.18f;
     [SerializeField] private int waveBreakSeconds = 10;
     [SerializeField] private float spawnX = 10.25f;
     [SerializeField] private float offscreenSpawnPadding = 1.25f;
     [SerializeField] private float loseX = -6.45f;
+
     [SerializeField] private float laneSpawnCooldown = 1f;
+
+    [SerializeField] private float enemyHealthGrowthPerWave = 0.10f;
+    [SerializeField] private float enemyAttackGrowthPerWave = 0.07f;
+    [SerializeField] private float enemyMilkDropGrowthPerWave = 0.06f;
+    [SerializeField] private float enemySpeedGrowthPerWave = 0.01f;
+    [SerializeField] private float enemyMaxSpeedMultiplier = 1.22f;
 
     private readonly TowerTileScript[,] tiles = new TowerTileScript[LaneCount, ColumnCount];
     private readonly List<EnemyScript> activeEnemies = new List<EnemyScript>();

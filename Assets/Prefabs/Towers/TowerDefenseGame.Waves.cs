@@ -16,15 +16,18 @@ public sealed partial class TowerDefenseGame
             }
 
             waveNumber++;
+
             int waveMoney = Mathf.RoundToInt(initialWaveMoney * Mathf.Pow(waveMoneyGrowth, waveNumber - 1));
             List<EnemyKind>[] wavePurchases = BuildWavePurchases(waveMoney);
+
             float[] nextLaneSpawnTime = new float[LaneCount];
+            int lastSpawnLane = -1;
 
             ShowStatus("Wave " + waveNumber + " has " + waveMoney + " enemy money.");
 
             while (!gameOver && HasEnemiesToSpawn(wavePurchases))
             {
-                int lane = ChooseLaneWithQueuedEnemy(wavePurchases, nextLaneSpawnTime);
+                int lane = ChooseLaneWithQueuedEnemy(wavePurchases, nextLaneSpawnTime, lastSpawnLane);
 
                 if (lane < 0)
                 {
@@ -37,9 +40,10 @@ public sealed partial class TowerDefenseGame
 
                 SpawnEnemy(enemyKind, lane);
 
-                nextLaneSpawnTime[lane] = Time.time + 1f;
+                nextLaneSpawnTime[lane] = Time.time + laneSpawnCooldown;
+                lastSpawnLane = lane;
 
-                yield return new WaitForSeconds(Random.Range(0.45f, 1.05f));
+                yield return new WaitForSeconds(Random.Range(0.45f, 0.95f));
             }
 
             float clearTimeout = 45f;
@@ -78,19 +82,23 @@ public sealed partial class TowerDefenseGame
                 yield break;
             }
 
-            ShowStatus("Next wave starts in " + second + ".");
+            string message = "Wave " + nextWaveNumber + " starts in " + second + " seconds.";
+
+            ShowStatus(message);
 
             if (countdownText != null)
             {
-                countdownText.text = "Wave " + nextWaveNumber + "\n" + second;
+                countdownText.text = message;
             }
 
             yield return new WaitForSeconds(1f);
         }
 
+        ShowStatus("Wave " + nextWaveNumber + " started.");
+
         if (countdownText != null)
         {
-            countdownText.text = "Wave " + nextWaveNumber + "\nGo!";
+            countdownText.text = "Wave " + nextWaveNumber + " started!";
         }
 
         yield return new WaitForSeconds(0.35f);
@@ -108,7 +116,7 @@ public sealed partial class TowerDefenseGame
 
         for (int lane = 0; lane < LaneCount; lane++)
         {
-            purchases[lane] = BuyEnemiesForLane(laneBudgets[lane]);
+            purchases[lane] = BuyEnemiesForLane(laneBudgets[lane], waveNumber);
         }
 
         return purchases;
@@ -118,20 +126,34 @@ public sealed partial class TowerDefenseGame
     {
         int[] laneBudgets = new int[LaneCount];
         int cheapestEnemyCost = GetCheapestEnemyCost();
-        int minimumLaneMoney = Mathf.Max(cheapestEnemyCost, Mathf.FloorToInt(waveMoney * 0.08f));
         int remainingMoney = waveMoney;
 
-        for (int lane = 0; lane < LaneCount; lane++)
+        if (remainingMoney >= cheapestEnemyCost * LaneCount)
         {
-            int laneMinimum = Mathf.Min(minimumLaneMoney, remainingMoney);
-            laneBudgets[lane] = laneMinimum;
-            remainingMoney -= laneMinimum;
+            for (int lane = 0; lane < LaneCount; lane++)
+            {
+                laneBudgets[lane] = cheapestEnemyCost;
+                remainingMoney -= cheapestEnemyCost;
+            }
+        }
+        else
+        {
+            int lane = 0;
+
+            while (remainingMoney >= cheapestEnemyCost)
+            {
+                laneBudgets[lane % LaneCount] += cheapestEnemyCost;
+                remainingMoney -= cheapestEnemyCost;
+                lane++;
+            }
         }
 
         while (remainingMoney > 0)
         {
-            int lane = Random.Range(0, LaneCount);
-            int amount = Random.Range(1, remainingMoney + 1);
+            int lane = GetLaneWithSmallestBudget(laneBudgets);
+            int maxChunk = Mathf.Min(remainingMoney, cheapestEnemyCost * 2);
+            int amount = Random.Range(1, maxChunk + 1);
+
             laneBudgets[lane] += amount;
             remainingMoney -= amount;
         }
@@ -139,14 +161,36 @@ public sealed partial class TowerDefenseGame
         return laneBudgets;
     }
 
-    private List<EnemyKind> BuyEnemiesForLane(int laneBudget)
+    private int GetLaneWithSmallestBudget(int[] laneBudgets)
+    {
+        int smallestBudget = int.MaxValue;
+        List<int> smallestLanes = new List<int>();
+
+        for (int lane = 0; lane < laneBudgets.Length; lane++)
+        {
+            if (laneBudgets[lane] < smallestBudget)
+            {
+                smallestBudget = laneBudgets[lane];
+                smallestLanes.Clear();
+                smallestLanes.Add(lane);
+            }
+            else if (laneBudgets[lane] == smallestBudget)
+            {
+                smallestLanes.Add(lane);
+            }
+        }
+
+        return smallestLanes[Random.Range(0, smallestLanes.Count)];
+    }
+
+    private List<EnemyKind> BuyEnemiesForLane(int laneBudget, int currentWave)
     {
         List<EnemyKind> enemies = new List<EnemyKind>();
         int cheapestEnemyCost = GetCheapestEnemyCost();
 
         while (laneBudget >= cheapestEnemyCost)
         {
-            List<EnemyDefinition> affordableEnemies = GetAffordableEnemies(laneBudget);
+            List<EnemyDefinition> affordableEnemies = GetAffordableEnemies(laneBudget, currentWave);
 
             if (affordableEnemies.Count == 0)
             {
@@ -173,12 +217,17 @@ public sealed partial class TowerDefenseGame
         return cheapest;
     }
 
-    private List<EnemyDefinition> GetAffordableEnemies(int budget)
+    private List<EnemyDefinition> GetAffordableEnemies(int budget, int currentWave)
     {
         List<EnemyDefinition> affordableEnemies = new List<EnemyDefinition>();
 
         foreach (EnemyDefinition enemyDefinition in GameDefinitions.AllEnemies)
         {
+            if (!IsEnemyUnlocked(enemyDefinition.Kind, currentWave))
+            {
+                continue;
+            }
+
             if (GetEnemyCost(enemyDefinition.Kind) <= budget)
             {
                 affordableEnemies.Add(enemyDefinition);
@@ -186,6 +235,24 @@ public sealed partial class TowerDefenseGame
         }
 
         return affordableEnemies;
+    }
+
+    private bool IsEnemyUnlocked(EnemyKind enemyKind, int currentWave)
+    {
+        switch (enemyKind)
+        {
+            case EnemyKind.Hound:
+                return true;
+
+            case EnemyKind.Zombie:
+                return currentWave >= 2;
+
+            case EnemyKind.Ranger:
+                return currentWave >= 3;
+
+            default:
+                return true;
+        }
     }
 
     private bool HasEnemiesToSpawn(List<EnemyKind>[] wavePurchases)
@@ -201,7 +268,7 @@ public sealed partial class TowerDefenseGame
         return false;
     }
 
-    private int ChooseLaneWithQueuedEnemy(List<EnemyKind>[] wavePurchases, float[] nextLaneSpawnTime)
+    private int ChooseLaneWithQueuedEnemy(List<EnemyKind>[] wavePurchases, float[] nextLaneSpawnTime, int lastSpawnLane)
     {
         List<int> lanes = new List<int>();
 
@@ -218,12 +285,17 @@ public sealed partial class TowerDefenseGame
             return -1;
         }
 
+        if (lanes.Count > 1 && lastSpawnLane >= 0)
+        {
+            lanes.Remove(lastSpawnLane);
+        }
+
         return lanes[Random.Range(0, lanes.Count)];
     }
 
     private float GetShortestLaneSpawnWait(List<EnemyKind>[] wavePurchases, float[] nextLaneSpawnTime)
     {
-        float shortestWait = 1f;
+        float shortestWait = laneSpawnCooldown;
 
         for (int lane = 0; lane < wavePurchases.Length; lane++)
         {
@@ -235,7 +307,7 @@ public sealed partial class TowerDefenseGame
             shortestWait = Mathf.Min(shortestWait, nextLaneSpawnTime[lane] - Time.time);
         }
 
-        return Mathf.Clamp(shortestWait, 0.05f, 1f);
+        return Mathf.Clamp(shortestWait, 0.05f, laneSpawnCooldown);
     }
 
     private void DespawnAllSkeletons()

@@ -42,10 +42,11 @@ public sealed partial class TowerDefenseGame
         statusText = CreateText(topRect, "StatusText", "Choose a tower, then click a tile.", 20, TextAnchor.MiddleRight);
         SetRect(statusText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-18f, -46f), new Vector2(650f, 28f), new Vector2(1f, 0.5f));
 
-        countdownText = CreateText(canvasRect, "WaveCountdown", "", 88, TextAnchor.MiddleCenter);
-        countdownText.color = new Color(1f, 0.94f, 0.54f);
+        countdownText = CreateText(canvasRect, "WaveCountdown", "", 52, TextAnchor.MiddleCenter);
+        countdownText.color = new Color(1f, 0.94f, 0.54f, 0.78f);
+        countdownText.raycastTarget = false;
         countdownText.gameObject.SetActive(false);
-        SetRect(countdownText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(620f, 220f), new Vector2(0.5f, 0.5f));
+        SetRect(countdownText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -82f), new Vector2(620f, 86f), new Vector2(0.5f, 1f));
 
         GameObject towerBar = CreatePanel(canvasRect, "Tower Bar", new Color(0.08f, 0.1f, 0.12f, 0.86f));
         RectTransform towerBarRect = towerBar.GetComponent<RectTransform>();
@@ -103,6 +104,7 @@ public sealed partial class TowerDefenseGame
     {
         GameObject textObject = new GameObject(objectName, typeof(RectTransform));
         textObject.transform.SetParent(parent, false);
+
         Text uiText = textObject.AddComponent<Text>();
         uiText.font = defaultFont;
         uiText.text = text;
@@ -111,6 +113,8 @@ public sealed partial class TowerDefenseGame
         uiText.color = Color.white;
         uiText.horizontalOverflow = HorizontalWrapMode.Wrap;
         uiText.verticalOverflow = VerticalWrapMode.Truncate;
+        uiText.raycastTarget = false;
+
         return uiText;
     }
 
