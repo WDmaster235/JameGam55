@@ -6,12 +6,12 @@ using UnityEngine.UI;
 
 public sealed partial class TowerDefenseGame : MonoBehaviour
 {
-    public const int LaneCount = 4;
+    public const int LaneCount = 5;
     public const int ColumnCount = 7;
 
     public static TowerDefenseGame Instance { get; private set; }
 
-    [SerializeField] private int startingMilk = 175;
+    [SerializeField] private int startingMilk = 200;
     [SerializeField] private int initialWaveMoney = 55;
     [SerializeField] private float waveMoneyGrowth = 1.35f;
     [SerializeField] private int waveBreakSeconds = 10;
@@ -41,7 +41,6 @@ public sealed partial class TowerDefenseGame : MonoBehaviour
     private Text countdownText;
     private Image milkFill;
     private Button upgradeButton;
-    private Button rechargeButton;
     private Button sellButton;
     private Sprite squareSprite;
     private Font defaultFont;

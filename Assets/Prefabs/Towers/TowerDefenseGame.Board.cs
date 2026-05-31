@@ -4,11 +4,10 @@ public sealed partial class TowerDefenseGame
 {
     private void BuildBoard()
     {
-        // four lanes are built from simple runtime tiles
         float startX = -5.85f;
-        float startY = 2.15f;
+        float startY = 2.25f;
         float tileSpacingX = 1.12f;
-        float laneSpacingY = 1.18f;
+        float laneSpacingY = 1.0f;
 
         for (int lane = 0; lane < LaneCount; lane++)
         {
@@ -23,9 +22,12 @@ public sealed partial class TowerDefenseGame
 
                 SpriteRenderer renderer = tileObject.AddComponent<SpriteRenderer>();
                 renderer.sprite = squareSprite;
-                renderer.color = (lane + column) % 2 == 0 ? new Color(0.2f, 0.43f, 0.32f) : new Color(0.18f, 0.36f, 0.28f);
+                renderer.color = (lane + column) % 2 == 0
+                    ? new Color(0.2f, 0.43f, 0.32f)
+                    : new Color(0.18f, 0.36f, 0.28f);
                 renderer.sortingOrder = -2;
-                tileObject.transform.localScale = new Vector3(1.04f, 1.04f, 1f);
+
+                tileObject.transform.localScale = new Vector3(0.96f, 0.96f, 1f);
 
                 BoxCollider2D collider = tileObject.AddComponent<BoxCollider2D>();
                 collider.size = Vector2.one;
@@ -41,11 +43,13 @@ public sealed partial class TowerDefenseGame
     {
         GameObject laneObject = new GameObject("Lane " + (lane + 1));
         laneObject.transform.position = new Vector3(-2.5f, y, 0.15f);
-        laneObject.transform.localScale = new Vector3(12.7f, 1.08f, 1f);
+        laneObject.transform.localScale = new Vector3(12.7f, 0.92f, 1f);
 
         SpriteRenderer renderer = laneObject.AddComponent<SpriteRenderer>();
         renderer.sprite = squareSprite;
-        renderer.color = lane % 2 == 0 ? new Color(0.11f, 0.26f, 0.21f) : new Color(0.1f, 0.22f, 0.19f);
+        renderer.color = lane % 2 == 0
+            ? new Color(0.11f, 0.26f, 0.21f)
+            : new Color(0.1f, 0.22f, 0.19f);
         renderer.sortingOrder = -3;
     }
 

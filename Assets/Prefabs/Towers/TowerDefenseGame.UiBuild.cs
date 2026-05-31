@@ -82,12 +82,8 @@ public sealed partial class TowerDefenseGame
         SetRect(detailText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(12f, -44f), new Vector2(-24f, 120f), new Vector2(0f, 1f));
 
         upgradeButton = CreateButton(detailRect, "Upgrade", 18, new Color(0.86f, 0.78f, 0.35f));
-        SetRect(upgradeButton.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(12f, 58f), new Vector2(130f, 40f), new Vector2(0f, 0f));
+        SetRect(upgradeButton.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(12f, 58f), new Vector2(-24f, 40f), new Vector2(0f, 0f));
         upgradeButton.onClick.AddListener(UpgradeSelectedTower);
-
-        rechargeButton = CreateButton(detailRect, "Recharge", 18, new Color(0.42f, 0.78f, 0.95f));
-        SetRect(rechargeButton.GetComponent<RectTransform>(), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-142f, 58f), new Vector2(130f, 40f), new Vector2(0f, 0f));
-        rechargeButton.onClick.AddListener(RechargeSelectedTower);
 
         sellButton = CreateButton(detailRect, "Sell", 18, new Color(0.94f, 0.5f, 0.45f));
         SetRect(sellButton.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(12f, 12f), new Vector2(-24f, 38f), new Vector2(0f, 0f));

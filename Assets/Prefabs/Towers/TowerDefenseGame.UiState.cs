@@ -46,7 +46,6 @@ public sealed partial class TowerDefenseGame
             return;
         }
 
-        // the ui is rebuilt from the current game state
         milkText.text = "Milk: " + milk;
         waveText.text = gameOver ? "Wave " + waveNumber + " - Game Over" : "Wave " + waveNumber;
         milkFill.fillAmount = Mathf.Clamp01(milk / Mathf.Max(250f, milk));
@@ -79,30 +78,33 @@ public sealed partial class TowerDefenseGame
         {
             int upgradeCost = selectedTower.GetUpgradeCost();
             int sellRefund = selectedTower.GetSellRefund();
+
             detailText.text = selectedTower.DisplayName + " Lv " + selectedTower.Level
                 + "\nHP " + selectedTower.CurrentHealth + "/" + selectedTower.MaxHealth
-                + (selectedTower.UsesMilkStorage ? "\nStored milk " + selectedTower.CurrentMilk + "/" + selectedTower.MilkStorage : "\nMakes milk every 7 sec")
+                + (selectedTower.UsesMilkStorage
+                    ? "\nAuto milk " + selectedTower.CurrentMilk + "/" + selectedTower.MilkStorage
+                    : "\nMakes milk every few sec")
                 + "\nUpgrade: " + upgradeCost + " milk"
                 + "\nSell: " + sellRefund + " milk";
+
             upgradeButton.interactable = !gameOver && milk - upgradeCost > 0;
-            rechargeButton.interactable = !gameOver && selectedTower.UsesMilkStorage && milk > 0 && selectedTower.CurrentMilk < selectedTower.MilkStorage;
             sellButton.interactable = !gameOver;
         }
         else if (selectedBuildKind.HasValue)
         {
             TowerDefinition selectedDefinition = GameDefinitions.GetTower(selectedBuildKind.Value);
+
             detailText.text = selectedDefinition.DisplayName
                 + "\nCost: " + selectedDefinition.Cost + " milk"
                 + "\nClick an empty tile to place it.";
+
             upgradeButton.interactable = false;
-            rechargeButton.interactable = false;
             sellButton.interactable = false;
         }
         else
         {
             detailText.text = selectedTile != null ? "Empty tile selected." : "Click a placed tower.";
             upgradeButton.interactable = false;
-            rechargeButton.interactable = false;
             sellButton.interactable = false;
         }
     }

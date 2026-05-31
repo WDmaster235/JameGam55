@@ -8,7 +8,6 @@ public sealed partial class TowerDefenseGame
     {
         while (!gameOver)
         {
-            // every wave starts after a visible break
             yield return StartCoroutine(ShowWaveCountdown(waveNumber + 1));
 
             if (gameOver)
@@ -19,9 +18,9 @@ public sealed partial class TowerDefenseGame
             waveNumber++;
             int waveMoney = Mathf.RoundToInt(initialWaveMoney * Mathf.Pow(waveMoneyGrowth, waveNumber - 1));
             List<EnemyKind>[] wavePurchases = BuildWavePurchases(waveMoney);
-            ShowStatus("Wave " + waveNumber + " has " + waveMoney + " enemy money.");
-
             float[] nextLaneSpawnTime = new float[LaneCount];
+
+            ShowStatus("Wave " + waveNumber + " has " + waveMoney + " enemy money.");
 
             while (!gameOver && HasEnemiesToSpawn(wavePurchases))
             {
@@ -35,8 +34,11 @@ public sealed partial class TowerDefenseGame
 
                 EnemyKind enemyKind = wavePurchases[lane][0];
                 wavePurchases[lane].RemoveAt(0);
+
                 SpawnEnemy(enemyKind, lane);
-                nextLaneSpawnTime[lane] = Time.time + laneSpawnCooldown;
+
+                nextLaneSpawnTime[lane] = Time.time + 1f;
+
                 yield return new WaitForSeconds(Random.Range(0.45f, 1.05f));
             }
 
@@ -56,7 +58,8 @@ public sealed partial class TowerDefenseGame
 
             if (!gameOver)
             {
-                ShowStatus("Wave " + waveNumber + " cleared.");
+                DespawnAllSkeletons();
+                ShowStatus("Wave " + waveNumber + " cleared. Skeletons despawned.");
             }
         }
     }
@@ -100,7 +103,6 @@ public sealed partial class TowerDefenseGame
 
     private List<EnemyKind>[] BuildWavePurchases(int waveMoney)
     {
-        // wave money is split across the four lanes
         int[] laneBudgets = SplitMoneyAcrossLanes(waveMoney);
         List<EnemyKind>[] purchases = new List<EnemyKind>[LaneCount];
 
@@ -115,13 +117,15 @@ public sealed partial class TowerDefenseGame
     private int[] SplitMoneyAcrossLanes(int waveMoney)
     {
         int[] laneBudgets = new int[LaneCount];
-        int minimumLaneMoney = Mathf.FloorToInt(waveMoney * 0.1f);
+        int cheapestEnemyCost = GetCheapestEnemyCost();
+        int minimumLaneMoney = Mathf.Max(cheapestEnemyCost, Mathf.FloorToInt(waveMoney * 0.08f));
         int remainingMoney = waveMoney;
 
         for (int lane = 0; lane < LaneCount; lane++)
         {
-            laneBudgets[lane] = minimumLaneMoney;
-            remainingMoney -= minimumLaneMoney;
+            int laneMinimum = Mathf.Min(minimumLaneMoney, remainingMoney);
+            laneBudgets[lane] = laneMinimum;
+            remainingMoney -= laneMinimum;
         }
 
         while (remainingMoney > 0)
@@ -219,7 +223,7 @@ public sealed partial class TowerDefenseGame
 
     private float GetShortestLaneSpawnWait(List<EnemyKind>[] wavePurchases, float[] nextLaneSpawnTime)
     {
-        float shortestWait = laneSpawnCooldown;
+        float shortestWait = 1f;
 
         for (int lane = 0; lane < wavePurchases.Length; lane++)
         {
@@ -231,6 +235,21 @@ public sealed partial class TowerDefenseGame
             shortestWait = Mathf.Min(shortestWait, nextLaneSpawnTime[lane] - Time.time);
         }
 
-        return Mathf.Clamp(shortestWait, 0.05f, laneSpawnCooldown);
+        return Mathf.Clamp(shortestWait, 0.05f, 1f);
+    }
+
+    private void DespawnAllSkeletons()
+    {
+        for (int i = activeSkeletons.Count - 1; i >= 0; i--)
+        {
+            SkeletonScript skeleton = activeSkeletons[i];
+
+            if (skeleton != null)
+            {
+                Destroy(skeleton.gameObject);
+            }
+        }
+
+        activeSkeletons.Clear();
     }
 }
